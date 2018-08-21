@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28010.2003
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DistanceService", "DistanceService\DistanceService.csproj", "{409D9AA2-AA3A-40BA-B6E0-69CC2DB3E051}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{409D9AA2-AA3A-40BA-B6E0-69CC2DB3E051}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{409D9AA2-AA3A-40BA-B6E0-69CC2DB3E051}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{409D9AA2-AA3A-40BA-B6E0-69CC2DB3E051}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{409D9AA2-AA3A-40BA-B6E0-69CC2DB3E051}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {88EE0022-DDA8-454A-AE42-25F841CE7D3D}
+	EndGlobalSection
+EndGlobal
