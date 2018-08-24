@@ -19,7 +19,7 @@
     "DistanceService": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "api/values",
+      "launchUrl": "api/distance/KBP-AMS",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

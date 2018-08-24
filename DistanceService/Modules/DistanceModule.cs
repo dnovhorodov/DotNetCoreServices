@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Device.Location;
+using System.Dynamic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using DistanceService.Models;
 using Microsoft.Extensions.Configuration;
 using Nancy;
-using Newtonsoft.Json;
 using Polly;
 using Polly.Registry;
 
@@ -20,41 +21,51 @@ namespace DistanceService.Modules
         {
             AirportServiceUri = new Uri(configuration["ExternalServices:0:AirportServiceUri"]);
             Registry = registry;
-            
-            Get("api/distance/{from:iata}-{to:iata}", async (args, ct) =>
-            {
-                var airportFrom = await GetAirportInfo((string)args.from, ct);
-                var airportTo = await GetAirportInfo((string)args.to, ct);
-                ThrowIfDataProblems(airportFrom, airportTo);
 
-
-
-                return 200;
-            });
+            Get("api/distance/{from:iata}-{to:iata}", GetDistance);
         }
 
-        private async Task<AirportModel> GetAirportInfo(string iata, CancellationToken ct)
+        private async Task<Response> GetDistance(dynamic args, CancellationToken ct)
+        {
+            var airportOneResponse = await GetAirportResponseAsync((string)args.from, ct);
+            if (airportOneResponse.StatusCode != HttpStatusCode.OK)
+                return airportOneResponse;
+
+            var airportTwoResponse = await GetAirportResponseAsync((string)args.to, ct);
+            if (airportTwoResponse.StatusCode != HttpStatusCode.OK)
+                return airportTwoResponse;
+
+            var airportOneModel = airportOneResponse.GetModel<AirportModel>();
+            var airportTwoModel = airportTwoResponse.GetModel<AirportModel>();
+            var distance = CalculateDistance(airportOneModel, airportTwoModel);
+
+            dynamic model = new ExpandoObject();
+            model.AirportOne = airportOneModel.iata;
+            model.AirportTwo = airportTwoModel.iata;
+            model.Distance = $"{(int)distance} miles";
+
+            return Response.AsJson((object)model);
+        }
+
+        private async Task<Response> GetAirportResponseAsync(string iata, CancellationToken ct)
         {
             var httpClient = new HttpClient();
             var request = $"{AirportServiceUri.AbsoluteUri}/{iata}";
 
-            var response = await Registry.Get<IAsyncPolicy<HttpResponseMessage>>("StandardHttpResilience")
+            var httpResponse = await Registry.Get<IAsyncPolicy<HttpResponseMessage>>("StandardHttpResilience")
                 .ExecuteAsync(() => httpClient.GetAsync(request, ct));
 
-            var stringContent = await response.Content.ReadAsStringAsync();
             ct.ThrowIfCancellationRequested();
 
-            return JsonConvert.DeserializeObject<AirportModel>(stringContent);
+            return await httpResponse.CreateResponse();
         }
 
-        private void CalculateDistance()
+        private double CalculateDistance(AirportModel from, AirportModel to)
         {
+            var fromCoord = new GeoCoordinate(from.location.lat, from.location.lon);
+            var toCoord = new GeoCoordinate(to.location.lat, to.location.lon);
 
-        }
-
-        private void ThrowIfDataProblems(AirportModel from, AirportModel to)
-        {
-
+            return fromCoord.GetDistanceTo(toCoord) / 1609.344; // meters to miles
         }
     }
 }
